@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aprende MITRE ATT&CK - Tutorial Interactivo</title>
+    <title>MITRE ATT&CK v2.0 - Plataforma de Aprendizaje Avanzada</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -12,6 +12,40 @@
         body {
             margin: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark-mode {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        .dark-mode .bg-white { background-color: #2d3748; }
+        .dark-mode .text-gray-800 { color: #e2e8f0; }
+        .dark-mode .text-gray-600 { color: #cbd5e0; }
+        .dark-mode .text-gray-500 { color: #a0aec0; }
+        .dark-mode .bg-gray-50 { background-color: #374151; }
+        .dark-mode .bg-gray-100 { background-color: #4a5568; }
+        .dark-mode .bg-gray-200 { background-color: #4a5568; }
+        .dark-mode .border-gray-200 { border-color: #4a5568; }
+        .quiz-option {
+            transition: all 0.3s;
+        }
+        .quiz-option:hover {
+            transform: translateX(5px);
+        }
+        .quiz-correct {
+            background-color: #10b981 !important;
+            color: white !important;
+        }
+        .quiz-incorrect {
+            background-color: #ef4444 !important;
+            color: white !important;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
         }
     </style>
 </head>
@@ -19,21 +53,9 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState } = React;
+        const { useState, useEffect } = React;
 
-        // Iconos SVG personalizados
-        const ChevronRight = ({ className, style }) => (
-            <svg className={className} style={style} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-        );
-
-        const ChevronLeft = ({ className }) => (
-            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-        );
-
+        // Iconos SVG
         const Shield = ({ className }) => (
             <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -52,21 +74,51 @@
             </svg>
         );
 
+        const Moon = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+        );
+
+        const Sun = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+        );
+
+        const Search = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+        );
+
+        const Download = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+        );
+
+        const ChevronRight = ({ className, style }) => (
+            <svg className={className} style={style} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+        );
+
+        const ChevronLeft = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+        );
+
         const CheckCircle = ({ className }) => (
             <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
         );
 
-        const Info = ({ className }) => (
+        const XCircle = ({ className }) => (
             <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-        );
-
-        const AlertTriangle = ({ className }) => (
-            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
         );
 
@@ -76,98 +128,432 @@
             </svg>
         );
 
+        const ClipboardList = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+            </svg>
+        );
+
+        const Info = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        );
+
+        // Datos completos de tácticas y técnicas
+        const fullTacticsData = [
+            {
+                id: 'reconnaissance',
+                name: 'Reconnaissance',
+                emoji: '🔍',
+                description: 'Recopilación de información sobre el objetivo',
+                objective: 'Conocer la infraestructura antes de atacar',
+                techniques: [
+                    { 
+                        id: 'T1595', 
+                        name: 'Active Scanning', 
+                        description: 'Escanear infraestructura de la víctima',
+                        example: 'Usar Nmap para escanear puertos abiertos en 192.168.1.0/24',
+                        detection: 'Monitorear tráfico de red inusual, detectar escaneos de puertos con IDS',
+                        mitigation: 'Implementar IDS/IPS, limitar servicios expuestos, rate limiting',
+                        subtechniques: [
+                            { id: 'T1595.001', name: 'Scanning IP Blocks', description: 'Escanear rangos completos de IPs' },
+                            { id: 'T1595.002', name: 'Vulnerability Scanning', description: 'Identificar vulnerabilidades conocidas' }
+                        ]
+                    },
+                    { 
+                        id: 'T1589', 
+                        name: 'Gather Victim Identity Information', 
+                        description: 'Recopilar información de empleados',
+                        example: 'Buscar empleados en LinkedIn, extraer correos de la web corporativa',
+                        detection: 'Difícil de detectar - ocurre fuera de la red organizacional',
+                        mitigation: 'Capacitación en seguridad, limitar información pública en redes sociales',
+                        subtechniques: [
+                            { id: 'T1589.001', name: 'Credentials', description: 'Buscar credenciales filtradas' },
+                            { id: 'T1589.002', name: 'Email Addresses', description: 'Recopilar direcciones de correo' }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'initial-access',
+                name: 'Initial Access',
+                emoji: '🚪',
+                description: 'Obtención del primer acceso al sistema objetivo',
+                objective: 'Entrar al sistema de la víctima',
+                techniques: [
+                    { 
+                        id: 'T1566', 
+                        name: 'Phishing', 
+                        description: 'Correos maliciosos para engañar usuarios',
+                        example: 'Email de "IT Support" con adjunto malicioso o link a credenciales falsas',
+                        detection: 'Filtros anti-phishing, análisis de enlaces, sandboxing de adjuntos',
+                        mitigation: 'Capacitación continua de usuarios, MFA obligatorio, email gateway security',
+                        subtechniques: [
+                            { id: 'T1566.001', name: 'Spearphishing Attachment', description: 'Adjuntos maliciosos personalizados' },
+                            { id: 'T1566.002', name: 'Spearphishing Link', description: 'Links a sitios de phishing' },
+                            { id: 'T1566.003', name: 'Spearphishing via Service', description: 'Phishing por redes sociales' }
+                        ]
+                    },
+                    { 
+                        id: 'T1190', 
+                        name: 'Exploit Public-Facing Application', 
+                        description: 'Explotar vulnerabilidades en aplicaciones web públicas',
+                        example: 'Inyección SQL en formulario de login: \' OR 1=1--',
+                        detection: 'WAF con reglas actualizadas, monitoreo de intentos de exploit, rate limiting',
+                        mitigation: 'Parchear vulnerabilidades, usar WAF, pruebas de penetración regulares, OWASP Top 10',
+                        subtechniques: []
+                    },
+                    { 
+                        id: 'T1078', 
+                        name: 'Valid Accounts', 
+                        description: 'Usar credenciales legítimas comprometidas',
+                        example: 'Login con contraseña obtenida de breach anterior (Have I Been Pwned)',
+                        detection: 'Detectar logins desde ubicaciones inusuales, horarios anómalos, impossible travel',
+                        mitigation: 'MFA obligatorio, políticas de contraseñas fuertes, rotación, detección de anomalías',
+                        subtechniques: [
+                            { id: 'T1078.001', name: 'Default Accounts', description: 'Cuentas por defecto no cambiadas' },
+                            { id: 'T1078.002', name: 'Domain Accounts', description: 'Cuentas de dominio comprometidas' },
+                            { id: 'T1078.003', name: 'Local Accounts', description: 'Cuentas locales del sistema' }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'execution',
+                name: 'Execution',
+                emoji: '⚡',
+                description: 'Ejecución de código malicioso en el sistema comprometido',
+                objective: 'Correr malware o comandos en la máquina víctima',
+                techniques: [
+                    { 
+                        id: 'T1204', 
+                        name: 'User Execution', 
+                        description: 'Engañar al usuario para ejecutar código malicioso',
+                        example: 'Usuario abre documento Word con macros maliciosas que ejecutan PowerShell',
+                        detection: 'Monitorear ejecución de archivos descargados, bloquear macros por defecto',
+                        mitigation: 'Deshabilitar macros, capacitación, aplicación whitelisting (AppLocker)',
+                        subtechniques: [
+                            { id: 'T1204.001', name: 'Malicious Link', description: 'Usuario hace clic en link malicioso' },
+                            { id: 'T1204.002', name: 'Malicious File', description: 'Usuario abre archivo malicioso' }
+                        ]
+                    },
+                    { 
+                        id: 'T1059', 
+                        name: 'Command and Scripting Interpreter', 
+                        description: 'Ejecutar comandos mediante intérpretes del sistema',
+                        example: 'PowerShell ejecutando: IEX(New-Object Net.WebClient).DownloadString(url)',
+                        detection: 'Script block logging de PowerShell, monitorear cmd.exe, Sysmon',
+                        mitigation: 'Constrained Language Mode, AppLocker, WDAC, deshabilitar PowerShell v2',
+                        subtechniques: [
+                            { id: 'T1059.001', name: 'PowerShell', description: 'Scripts PowerShell maliciosos' },
+                            { id: 'T1059.003', name: 'Windows Command Shell', description: 'cmd.exe y batch scripts' },
+                            { id: 'T1059.005', name: 'Visual Basic', description: 'VBScript malicioso' }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'persistence',
+                name: 'Persistence',
+                emoji: '🔒',
+                description: 'Mantener acceso al sistema tras reinicios',
+                objective: 'No perder acceso si se reinicia o cierra sesión',
+                techniques: [
+                    { 
+                        id: 'T1547', 
+                        name: 'Boot or Logon Autostart Execution', 
+                        description: 'Configurar malware para iniciarse automáticamente',
+                        example: 'Añadir entrada maliciosa en HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run',
+                        detection: 'Monitorear cambios en ubicaciones de autostart con Autoruns',
+                        mitigation: 'Auditar cambios en registro, Group Policy para restricciones',
+                        subtechniques: [
+                            { id: 'T1547.001', name: 'Registry Run Keys', description: 'Claves de registro de inicio' },
+                            { id: 'T1547.004', name: 'Winlogon Helper DLL', description: 'DLLs de ayuda de Winlogon' }
+                        ]
+                    },
+                    { 
+                        id: 'T1136', 
+                        name: 'Create Account', 
+                        description: 'Crear cuentas de usuario adicionales',
+                        example: 'net user hacker P@ssw0rd /add && net localgroup administrators hacker /add',
+                        detection: 'Alertas de creación de cuentas, auditoría de usuarios privilegiados',
+                        mitigation: 'Revisar cuentas regularmente, MFA obligatorio, PAM (Privileged Access Management)',
+                        subtechniques: [
+                            { id: 'T1136.001', name: 'Local Account', description: 'Cuenta local del sistema' },
+                            { id: 'T1136.002', name: 'Domain Account', description: 'Cuenta de dominio AD' }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'privilege-escalation',
+                name: 'Privilege Escalation',
+                emoji: '⬆️',
+                description: 'Obtener permisos de nivel superior',
+                objective: 'Pasar de usuario normal a administrador/SYSTEM',
+                techniques: [
+                    { 
+                        id: 'T1068', 
+                        name: 'Exploitation for Privilege Escalation', 
+                        description: 'Explotar vulnerabilidades para elevar privilegios',
+                        example: 'Explotar CVE-2021-1675 (PrintNightmare) para obtener SYSTEM',
+                        detection: 'Monitorear comportamiento anormal de procesos, EDR con detección de exploits',
+                        mitigation: 'Parchear sistemas rápidamente, reducir superficie de ataque, EMET/Exploit Protection',
+                        subtechniques: []
+                    },
+                    { 
+                        id: 'T1134', 
+                        name: 'Access Token Manipulation', 
+                        description: 'Manipular tokens de acceso de Windows',
+                        example: 'Usar token de proceso con privilegios más altos (Token Impersonation)',
+                        detection: 'Detectar uso de APIs como DuplicateToken, ImpersonateLoggedOnUser',
+                        mitigation: 'Privilegios mínimos, SeImpersonatePrivilege solo donde necesario, protección de tokens',
+                        subtechniques: [
+                            { id: 'T1134.001', name: 'Token Impersonation/Theft', description: 'Robar/impersonar tokens' },
+                            { id: 'T1134.002', name: 'Create Process with Token', description: 'Crear proceso con token robado' }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'defense-evasion',
+                name: 'Defense Evasion',
+                emoji: '👻',
+                description: 'Evitar ser detectado por sistemas de seguridad',
+                objective: 'Pasar desapercibido ante antivirus, EDR y analistas',
+                techniques: [
+                    { 
+                        id: 'T1070', 
+                        name: 'Indicator Removal', 
+                        description: 'Eliminar evidencias de actividad maliciosa',
+                        example: 'wevtutil cl Security && wevtutil cl System',
+                        detection: 'Detectar borrado masivo de logs, proteger Event Logs',
+                        mitigation: 'Enviar logs a SIEM externo en tiempo real, proteger archivos de log',
+                        subtechniques: [
+                            { id: 'T1070.001', name: 'Clear Windows Event Logs', description: 'Borrar logs de eventos' },
+                            { id: 'T1070.004', name: 'File Deletion', description: 'Eliminar archivos maliciosos' }
+                        ]
+                    },
+                    { 
+                        id: 'T1562', 
+                        name: 'Impair Defenses', 
+                        description: 'Desactivar herramientas de seguridad',
+                        example: 'Set-MpPreference -DisableRealtimeMonitoring $true',
+                        detection: 'Alertas cuando se desactivan servicios críticos, Tamper Protection',
+                        mitigation: 'Proteger servicios de seguridad, Tamper Protection, Group Policy',
+                        subtechniques: [
+                            { id: 'T1562.001', name: 'Disable or Modify Tools', description: 'Desactivar AV/EDR' },
+                            { id: 'T1562.004', name: 'Disable Event Logging', description: 'Deshabilitar logging' }
+                        ]
+                    },
+                    { 
+                        id: 'T1027', 
+                        name: 'Obfuscated Files or Information', 
+                        description: 'Ofuscar código malicioso',
+                        example: 'Base64 encode payload: powershell -enc <base64>',
+                        detection: 'Análisis heurístico, sandboxing, desobfuscación automática',
+                        mitigation: 'Análisis comportamental (EDR), machine learning para detección',
+                        subtechniques: [
+                            { id: 'T1027.002', name: 'Software Packing', description: 'Empaquetar con UPX, etc.' },
+                            { id: 'T1027.010', name: 'Command Obfuscation', description: 'Ofuscar comandos PowerShell' }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // Quiz questions
+        const quizQuestions = [
+            {
+                id: 1,
+                question: '¿Cuál es la diferencia principal entre Táctica y Técnica?',
+                options: [
+                    'No hay diferencia, son lo mismo',
+                    'Táctica es el objetivo, Técnica es el método',
+                    'Técnica es el objetivo, Táctica es el método',
+                    'Táctica es solo para defensa, Técnica para ataque'
+                ],
+                correct: 1,
+                explanation: 'Las tácticas representan el objetivo (el POR QUÉ), mientras que las técnicas son los métodos específicos para lograrlo (el CÓMO).'
+            },
+            {
+                id: 2,
+                question: '¿Qué técnica se usa comúnmente para Initial Access?',
+                options: [
+                    'Registry Run Keys',
+                    'Phishing',
+                    'Data Encrypted for Impact',
+                    'Token Manipulation'
+                ],
+                correct: 1,
+                explanation: 'Phishing (T1566) es una de las técnicas más comunes de Initial Access, donde se engaña a usuarios mediante correos maliciosos.'
+            },
+            {
+                id: 3,
+                question: '¿Qué ID de técnica corresponde a Phishing?',
+                options: [
+                    'T1070',
+                    'T1190',
+                    'T1566',
+                    'T1547'
+                ],
+                correct: 2,
+                explanation: 'T1566 es el ID oficial de la técnica Phishing en el framework MITRE ATT&CK.'
+            },
+            {
+                id: 4,
+                question: '¿Cuál es el objetivo de la táctica "Persistence"?',
+                options: [
+                    'Robar credenciales',
+                    'Mantener acceso tras reinicios',
+                    'Cifrar datos',
+                    'Escanear la red'
+                ],
+                correct: 1,
+                explanation: 'Persistence tiene como objetivo mantener el acceso al sistema incluso después de reinicios o cierres de sesión.'
+            },
+            {
+                id: 5,
+                question: '¿Qué técnica permite a un atacante elevar privilegios manipulando tokens de Windows?',
+                options: [
+                    'Phishing',
+                    'Active Scanning',
+                    'Access Token Manipulation (T1134)',
+                    'User Execution'
+                ],
+                correct: 2,
+                explanation: 'Access Token Manipulation (T1134) permite manipular tokens de acceso de Windows para elevar privilegios.'
+            },
+            {
+                id: 6,
+                question: '¿Qué mitigación es MÁS efectiva contra Phishing?',
+                options: [
+                    'Instalar antivirus',
+                    'Capacitación de usuarios + MFA',
+                    'Cambiar contraseñas cada mes',
+                    'Desactivar JavaScript'
+                ],
+                correct: 1,
+                explanation: 'La combinación de capacitación continua de usuarios y autenticación multifactor (MFA) es la defensa más efectiva contra phishing.'
+            }
+        ];
+
+        // Case studies
+        const caseStudies = [
+            {
+                id: 1,
+                title: 'Ataque Ransomware WannaCry',
+                year: '2017',
+                description: 'Uno de los ataques de ransomware más devastadores de la historia',
+                scenario: 'WannaCry infectó más de 200,000 computadoras en 150 países explotando la vulnerabilidad EternalBlue.',
+                attackChain: [
+                    { tactic: 'Initial Access', technique: 'T1190 - Exploit Public-Facing Application', detail: 'Explotó EternalBlue (MS17-010) en SMBv1' },
+                    { tactic: 'Execution', technique: 'T1059 - Command and Scripting Interpreter', detail: 'Ejecutó payload mediante cmd.exe' },
+                    { tactic: 'Persistence', technique: 'T1547.001 - Registry Run Keys', detail: 'Se añadió a inicio automático' },
+                    { tactic: 'Defense Evasion', technique: 'T1070 - Indicator Removal', detail: 'Intentó eliminar rastros' },
+                    { tactic: 'Impact', technique: 'T1486 - Data Encrypted for Impact', detail: 'Cifró archivos con criptografía fuerte' }
+                ],
+                lessons: [
+                    'Parchear sistemas críticos inmediatamente',
+                    'Deshabilitar SMBv1 si no es necesario',
+                    'Mantener backups offline',
+                    'Segmentar la red para contener propagación'
+                ]
+            },
+            {
+                id: 2,
+                title: 'APT29 (Cozy Bear) - SolarWinds',
+                year: '2020',
+                description: 'Sofisticado ataque a la cadena de suministro que comprometió agencias gubernamentales',
+                scenario: 'APT29 comprometió SolarWinds Orion, afectando a miles de organizaciones incluyendo agencias de EE.UU.',
+                attackChain: [
+                    { tactic: 'Initial Access', technique: 'T1195.002 - Supply Chain Compromise', detail: 'Comprometió el proceso de build de SolarWinds' },
+                    { tactic: 'Execution', technique: 'T1203 - Exploitation for Client Execution', detail: 'DLL maliciosa (SUNBURST) ejecutada automáticamente' },
+                    { tactic: 'Persistence', technique: 'T1554 - Compromise Client Software Binary', detail: 'Backdoor persistente en software legítimo' },
+                    { tactic: 'Defense Evasion', technique: 'T1027 - Obfuscated Files', detail: 'Código altamente ofuscado para evitar detección' },
+                    { tactic: 'Command and Control', technique: 'T1071.001 - Web Protocols', detail: 'C2 via HTTP/HTTPS a dominios legítimos' }
+                ],
+                lessons: [
+                    'Verificar integridad de actualizaciones de software',
+                    'Implementar Zero Trust Architecture',
+                    'Monitorear comportamiento de aplicaciones confiables',
+                    'Revisar cadena de suministro de software crítico'
+                ]
+            }
+        ];
+
         const MitreAttackApp = () => {
+            const [darkMode, setDarkMode] = useState(false);
+            const [mode, setMode] = useState('basic'); // basic o advanced
+            const [currentView, setCurrentView] = useState('learning'); // learning, explorer, quiz, cases
             const [currentStep, setCurrentStep] = useState(0);
+            const [searchTerm, setSearchTerm] = useState('');
             const [selectedTactic, setSelectedTactic] = useState(null);
-            const [completedSteps, setCompletedSteps] = useState([]);
-            const [mode, setMode] = useState('basic');
             const [selectedTechniqueDetail, setSelectedTechniqueDetail] = useState(null);
-            const [filterTactic, setFilterTactic] = useState('all');
+            const [completedSteps, setCompletedSteps] = useState([]);
+            const [userProgress, setUserProgress] = useState({ viewed: [], quizScore: 0, casesRead: [] });
+            
+            // Quiz state
+            const [currentQuizQuestion, setCurrentQuizQuestion] = useState(0);
+            const [selectedAnswer, setSelectedAnswer] = useState(null);
+            const [showQuizResult, setShowQuizResult] = useState(false);
+            const [quizAnswers, setQuizAnswers] = useState([]);
 
-            const tacticsData = [
-                {
-                    id: 'reconnaissance',
-                    name: 'Reconnaissance',
-                    emoji: '🔍',
-                    description: 'El atacante recopila información para planificar operaciones futuras',
-                    objective: 'Conocer el objetivo antes de atacarlo',
-                    techniques: [
-                        { id: 'T1595', name: 'Active Scanning', description: 'Escanear infraestructura de la víctima', example: 'Usar Nmap para escanear puertos abiertos', detection: 'Monitorear tráfico de red inusual', mitigation: 'Implementar IDS/IPS' },
-                        { id: 'T1589', name: 'Gather Victim Identity', description: 'Recopilar información de empleados', example: 'Buscar empleados en LinkedIn', detection: 'Difícil de detectar - ocurre fuera de la red', mitigation: 'Capacitación en seguridad' }
-                    ]
-                },
-                {
-                    id: 'initial-access',
-                    name: 'Initial Access',
-                    emoji: '🚪',
-                    description: 'Técnicas para obtener acceso inicial',
-                    objective: 'Entrar al sistema de la víctima',
-                    techniques: [
-                        { id: 'T1566', name: 'Phishing', description: 'Correos maliciosos para engañar usuarios', example: 'Email de IT pidiendo cambiar contraseña', detection: 'Filtros anti-phishing', mitigation: 'Capacitación de usuarios, MFA' },
-                        { id: 'T1190', name: 'Exploit Public Application', description: 'Explotar vulnerabilidades web', example: 'Inyección SQL en formulario login', detection: 'WAF, monitoreo de exploits', mitigation: 'Parchear vulnerabilidades, WAF' }
-                    ]
-                },
-                {
-                    id: 'execution',
-                    name: 'Execution',
-                    emoji: '⚡',
-                    description: 'Ejecutar código malicioso',
-                    objective: 'Correr malware en la máquina',
-                    techniques: [
-                        { id: 'T1204', name: 'User Execution', description: 'Engañar al usuario', example: 'Usuario abre archivo .exe malicioso', detection: 'Monitorear archivos descargados', mitigation: 'Bloquear macros, capacitación' }
-                    ]
-                },
-                {
-                    id: 'persistence',
-                    name: 'Persistence',
-                    emoji: '🔒',
-                    description: 'Mantener acceso al sistema',
-                    objective: 'No perder acceso tras reinicios',
-                    techniques: [
-                        { id: 'T1547', name: 'Boot Autostart', description: 'Iniciarse automáticamente', example: 'Registry Run Keys en Windows', detection: 'Monitorear cambios en autostart', mitigation: 'Auditar registro, mínimos privilegios' }
-                    ]
-                },
-                {
-                    id: 'defense-evasion',
-                    name: 'Defense Evasion',
-                    emoji: '👻',
-                    description: 'Evitar detección',
-                    objective: 'Pasar desapercibido',
-                    techniques: [
-                        { id: 'T1070', name: 'Indicator Removal', description: 'Eliminar evidencias', example: 'Borrar logs de eventos', detection: 'Detectar borrado de logs', mitigation: 'Logs externos, SIEM' }
-                    ]
-                },
-                {
-                    id: 'impact',
-                    name: 'Impact',
-                    emoji: '💥',
-                    description: 'Causar daño',
-                    objective: 'Destruir datos o interrumpir',
-                    techniques: [
-                        { id: 'T1486', name: 'Data Encrypted', description: 'Cifrar datos', example: 'Ransomware', detection: 'Cifrado masivo de archivos', mitigation: 'Backups offline, EDR' }
-                    ]
-                }
-            ];
+            // Case study state
+            const [selectedCase, setSelectedCase] = useState(null);
 
-            const steps = mode === 'basic' ? [
+            useEffect(() => {
+                const saved = localStorage.getItem('mitreProgress');
+                if (saved) setUserProgress(JSON.parse(saved));
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                setDarkMode(prefersDark);
+            }, []);
+
+            useEffect(() => {
+                localStorage.setItem('mitreProgress', JSON.stringify(userProgress));
+            }, [userProgress]);
+
+            useEffect(() => {
+                document.body.className = darkMode ? 'dark-mode' : '';
+            }, [darkMode]);
+
+            // Pasos del modo básico
+            const basicSteps = [
                 {
                     title: "¿Qué es MITRE ATT&CK?",
                     content: (
                         <div className="space-y-4">
                             <h3 className="text-2xl font-bold text-blue-600">Bienvenido al Framework MITRE ATT&CK</h3>
-                            <p className="text-lg">MITRE ATT&CK es una base de conocimiento global sobre tácticas y técnicas de adversarios cibernéticos.</p>
-                            <div className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500">
-                                <h4 className="font-bold mb-2">¿Para qué sirve?</h4>
+                            <p className="text-lg">MITRE ATT&CK es una base de conocimiento global sobre tácticas y técnicas de adversarios cibernéticos basada en observaciones del mundo real.</p>
+                            
+                            <div className={`${darkMode ? 'bg-blue-900' : 'bg-blue-50'} p-6 rounded-lg border-l-4 border-blue-500`}>
+                                <h4 className="font-bold text-lg mb-2">¿Para qué sirve?</h4>
                                 <ul className="space-y-2">
-                                    <li className="flex gap-2"><CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-1" /><span>Entender cómo operan los atacantes</span></li>
-                                    <li className="flex gap-2"><CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-1" /><span>Mejorar defensas de ciberseguridad</span></li>
+                                    <li className="flex items-start gap-2">
+                                        <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-1" />
+                                        <span>Entender cómo operan los atacantes reales</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-1" />
+                                        <span>Mejorar las defensas de ciberseguridad</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-1" />
+                                        <span>Comunicar amenazas de forma estandarizada</span>
+                                    </li>
                                 </ul>
                             </div>
-                            <div className="bg-gradient-to-r from-purple-100 to-pink-100 p-6 rounded-lg">
-                                <p className="font-semibold mb-2">🎓 Dos niveles:</p>
+
+                            <div className={`${darkMode ? 'bg-gradient-to-r from-purple-900 to-pink-900' : 'bg-gradient-to-r from-purple-100 to-pink-100'} p-6 rounded-lg`}>
+                                <p className="font-semibold mb-2">🎓 Dos modos de aprendizaje:</p>
                                 <div className="space-y-2">
-                                    <div className="bg-white p-3 rounded"><strong>Básico:</strong> Conceptos fundamentales</div>
-                                    <div className="bg-white p-3 rounded"><strong>Avanzado:</strong> Relación detallada con ejemplos reales</div>
+                                    <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} p-3 rounded`}>
+                                        <strong>Básico:</strong> Conceptos fundamentales y ejemplos generales
+                                    </div>
+                                    <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} p-3 rounded`}>
+                                        <strong>Avanzado:</strong> Explorador completo con sub-técnicas, búsqueda, quiz y casos de estudio
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -179,13 +565,13 @@
                         <div className="space-y-4">
                             <h3 className="text-2xl font-bold text-purple-600">Entendiendo la Diferencia</h3>
                             <div className="grid md:grid-cols-2 gap-4">
-                                <div className="bg-purple-50 p-6 rounded-lg border-2 border-purple-300">
+                                <div className={`${darkMode ? 'bg-purple-900' : 'bg-purple-50'} p-6 rounded-lg border-2 border-purple-300`}>
                                     <Target className="w-12 h-12 text-purple-600 mb-3" />
                                     <h4 className="font-bold text-lg mb-2">TÁCTICAS (El POR QUÉ)</h4>
                                     <p>Los <strong>objetivos</strong> que el atacante quiere lograr</p>
                                     <p className="text-sm mt-2 text-gray-600">Ejemplo: "Entrar al sistema"</p>
                                 </div>
-                                <div className="bg-green-50 p-6 rounded-lg border-2 border-green-300">
+                                <div className={`${darkMode ? 'bg-green-900' : 'bg-green-50'} p-6 rounded-lg border-2 border-green-300`}>
                                     <Zap className="w-12 h-12 text-green-600 mb-3" />
                                     <h4 className="font-bold text-lg mb-2">TÉCNICAS (El CÓMO)</h4>
                                     <p>Los <strong>métodos específicos</strong> para lograr el objetivo</p>
@@ -196,117 +582,116 @@
                     )
                 },
                 {
-                    title: "Resumen",
+                    title: "Explorar o Cambiar a Avanzado",
                     content: (
                         <div className="space-y-4">
                             <h3 className="text-2xl font-bold text-teal-600">🎓 ¡Nivel Básico Completado!</h3>
-                            <div className="bg-gradient-to-r from-orange-400 to-red-400 text-white p-6 rounded-lg">
-                                <h4 className="font-bold mb-2">🚀 Modo Avanzado</h4>
-                                <p className="mb-4">Aprende relación detallada, ejemplos reales, detección y mitigación</p>
-                                <button onClick={() => setMode('advanced')} className="bg-white text-orange-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-100">
-                                    Cambiar a Avanzado
-                                </button>
-                            </div>
-                        </div>
-                    )
-                }
-            ] : [
-                {
-                    title: "Modo Avanzado",
-                    content: (
-                        <div className="space-y-4">
-                            <h3 className="text-2xl font-bold text-indigo-600">Análisis Profundo</h3>
-                            <div className="grid md:grid-cols-3 gap-4">
-                                <div className="bg-purple-100 p-4 rounded-lg text-center">
-                                    <Target className="w-12 h-12 text-purple-600 mx-auto mb-2" />
-                                    <p className="font-bold">6 Tácticas</p>
-                                </div>
-                                <div className="bg-green-100 p-4 rounded-lg text-center">
-                                    <Zap className="w-12 h-12 text-green-600 mx-auto mb-2" />
-                                    <p className="font-bold">10+ Técnicas</p>
-                                </div>
-                                <div className="bg-blue-100 p-4 rounded-lg text-center">
-                                    <Info className="w-12 h-12 text-blue-600 mx-auto mb-2" />
-                                    <p className="font-bold">Con Detección</p>
-                                </div>
-                            </div>
-                        </div>
-                    )
-                },
-                {
-                    title: "Explorador",
-                    content: (
-                        <div className="space-y-4">
-                            <h3 className="text-2xl font-bold text-blue-600">Explorador de Tácticas</h3>
-                            <select value={filterTactic} onChange={(e) => setFilterTactic(e.target.value)} className="w-full px-3 py-2 border rounded-lg">
-                                <option value="all">Todas</option>
-                                {tacticsData.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                            </select>
-                            <div className="space-y-4">
-                                {tacticsData.filter(t => filterTactic === 'all' || t.id === filterTactic).map((tactic, idx) => (
-                                    <div key={idx} className="bg-white rounded-lg shadow-lg border-2">
-                                        <div className="bg-blue-500 text-white p-4 cursor-pointer hover:bg-blue-600" onClick={() => setSelectedTactic(selectedTactic === idx ? null : idx)}>
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-3xl">{tactic.emoji}</span>
-                                                    <div>
-                                                        <h4 className="font-bold text-xl">{tactic.name}</h4>
-                                                        <p className="text-sm opacity-90">{tactic.description}</p>
-                                                    </div>
-                                                </div>
-                                                <ChevronRight className="w-6 h-6" style={{ transform: selectedTactic === idx ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }} />
-                                            </div>
-                                        </div>
-                                        {selectedTactic === idx && (
-                                            <div className="p-6 bg-gray-50">
-                                                <div className="bg-blue-100 p-4 rounded-lg mb-4">
-                                                    <p className="font-semibold">🎯 Objetivo: {tactic.objective}</p>
-                                                </div>
-                                                <p className="font-bold mb-3">Técnicas ({tactic.techniques.length}):</p>
-                                                {tactic.techniques.map((tech, techIdx) => (
-                                                    <div key={techIdx} className="bg-white rounded-lg shadow border-l-4 border-green-500 mb-3">
-                                                        <div className="p-4 cursor-pointer" onClick={() => setSelectedTechniqueDetail(selectedTechniqueDetail === `${idx}-${techIdx}` ? null : `${idx}-${techIdx}`)}>
-                                                            <div className="flex justify-between">
-                                                                <div className="flex gap-3 flex-1">
-                                                                    <Zap className="w-5 h-5 text-green-600 mt-1" />
-                                                                    <div>
-                                                                        <div className="flex gap-2 mb-1">
-                                                                            <span className="font-mono text-xs bg-gray-200 px-2 py-1 rounded">{tech.id}</span>
-                                                                            <strong className="text-green-700">{tech.name}</strong>
-                                                                        </div>
-                                                                        <p className="text-sm">{tech.description}</p>
-                                                                    </div>
-                                                                </div>
-                                                                <ChevronRight className="w-5 h-5 text-gray-400" style={{ transform: selectedTechniqueDetail === `${idx}-${techIdx}` ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }} />
-                                                            </div>
-                                                        </div>
-                                                        {selectedTechniqueDetail === `${idx}-${techIdx}` && (
-                                                            <div className="px-4 pb-4 space-y-3">
-                                                                <div className="bg-orange-50 p-3 rounded border-l-4 border-orange-400">
-                                                                    <p className="font-semibold text-sm mb-1">💡 Ejemplo: {tech.example}</p>
-                                                                </div>
-                                                                <div className="bg-blue-50 p-3 rounded border-l-4 border-blue-400">
-                                                                    <p className="font-semibold text-sm mb-1">🔍 Detección: {tech.detection}</p>
-                                                                </div>
-                                                                <div className="bg-green-50 p-3 rounded border-l-4 border-green-400">
-                                                                    <p className="font-semibold text-sm mb-1">🛡️ Mitigación: {tech.mitigation}</p>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
+                            
+                            <div className={`${darkMode ? 'bg-gradient-to-br from-teal-900 to-blue-900' : 'bg-gradient-to-br from-teal-50 to-blue-50'} p-6 rounded-lg border-2 border-teal-300`}>
+                                <h4 className="font-bold text-xl mb-4">Has aprendido:</h4>
+                                <div className="space-y-3">
+                                    <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} p-4 rounded-lg`}>
+                                        <CheckCircle className="w-6 h-6 text-teal-600 inline mr-2" />
+                                        <strong>Qué es MITRE ATT&CK</strong> y para qué sirve
                                     </div>
-                                ))}
+                                    <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} p-4 rounded-lg`}>
+                                        <CheckCircle className="w-6 h-6 text-teal-600 inline mr-2" />
+                                        <strong>Diferencia entre Táctica y Técnica</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-gradient-to-r from-orange-400 to-red-400 text-white p-6 rounded-lg">
+                                <h4 className="font-bold text-lg mb-2">🚀 ¿Listo para más?</h4>
+                                <p className="mb-4">En el modo avanzado encontrarás:</p>
+                                <ul className="space-y-2 text-sm mb-4">
+                                    <li>✅ Explorador completo de tácticas y técnicas</li>
+                                    <li>✅ Sub-técnicas detalladas con IDs oficiales</li>
+                                    <li>✅ Búsqueda avanzada</li>
+                                    <li>✅ Quiz interactivo</li>
+                                    <li>✅ Casos de estudio reales</li>
+                                    <li>✅ Exportar tu progreso</li>
+                                </ul>
+                                <button
+                                    onClick={() => { setMode('advanced'); setCurrentView('explorer'); }}
+                                    className="bg-white text-orange-600 px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors w-full"
+                                >
+                                    Cambiar a Modo Avanzado
+                                </button>
                             </div>
                         </div>
                     )
                 }
             ];
 
+            const filteredTactics = fullTacticsData.filter(tactic =>
+                tactic.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                tactic.techniques.some(tech => 
+                    tech.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    tech.id.toLowerCase().includes(searchTerm.toLowerCase())
+                )
+            );
+
+            const handleTechniqueView = (tacticId, techniqueId) => {
+                const key = `${tacticId}-${techniqueId}`;
+                if (!userProgress.viewed.includes(key)) {
+                    setUserProgress(prev => ({
+                        ...prev,
+                        viewed: [...prev.viewed, key]
+                    }));
+                }
+            };
+
+            const handleQuizAnswer = (answerIndex) => {
+                setSelectedAnswer(answerIndex);
+                setShowQuizResult(true);
+                
+                const isCorrect = answerIndex === quizQuestions[currentQuizQuestion].correct;
+                setQuizAnswers(prev => [...prev, { question: currentQuizQuestion, correct: isCorrect }]);
+                
+                if (isCorrect) {
+                    setUserProgress(prev => ({
+                        ...prev,
+                        quizScore: prev.quizScore + 1
+                    }));
+                }
+            };
+
+            const nextQuizQuestion = () => {
+                if (currentQuizQuestion < quizQuestions.length - 1) {
+                    setCurrentQuizQuestion(prev => prev + 1);
+                    setSelectedAnswer(null);
+                    setShowQuizResult(false);
+                }
+            };
+
+            const resetQuiz = () => {
+                setCurrentQuizQuestion(0);
+                setSelectedAnswer(null);
+                setShowQuizResult(false);
+                setQuizAnswers([]);
+                setUserProgress(prev => ({ ...prev, quizScore: 0 }));
+            };
+
+            const exportProgress = () => {
+                const data = {
+                    exportDate: new Date().toISOString(),
+                    progress: userProgress,
+                    viewedTechniques: userProgress.viewed.length,
+                    quizScore: `${userProgress.quizScore}/${quizQuestions.length}`,
+                    casesCompleted: userProgress.casesRead.length
+                };
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `mitre-attack-progress-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+            };
+
             const nextStep = () => {
-                if (currentStep < steps.length - 1) {
+                if (currentStep < basicSteps.length - 1) {
                     if (!completedSteps.includes(currentStep)) {
                         setCompletedSteps([...completedSteps, currentStep]);
                     }
@@ -318,57 +703,474 @@
                 if (currentStep > 0) setCurrentStep(currentStep - 1);
             };
 
-            const progress = ((currentStep + 1) / steps.length) * 100;
+            const progress = mode === 'basic' 
+                ? ((currentStep + 1) / basicSteps.length) * 100
+                : ((userProgress.viewed.length / (fullTacticsData.reduce((acc, t) => acc + t.techniques.length, 0))) * 100);
 
             return (
-                <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-4">
-                    <div className="max-w-5xl mx-auto">
-                        <div className="bg-white rounded-lg shadow-xl p-6 mb-6">
-                            <div className="flex items-center justify-between mb-4">
+                <div className={`min-h-screen transition-colors ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50'} p-4`}>
+                    <div className="max-w-7xl mx-auto">
+                        {/* Header */}
+                        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl p-6 mb-6`}>
+                            <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
                                 <div className="flex items-center gap-3">
                                     <Shield className="w-10 h-10 text-blue-600" />
                                     <div>
-                                        <h1 className="text-3xl font-bold">Aprende MITRE ATT&CK</h1>
-                                        <p className="text-gray-600">Tutorial interactivo</p>
+                                        <h1 className="text-3xl font-bold">MITRE ATT&CK v2.0</h1>
+                                        <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Plataforma de Aprendizaje Avanzada</p>
                                     </div>
                                 </div>
-                                <div className="flex gap-2">
-                                    <button onClick={() => { setMode('basic'); setCurrentStep(0); }} className={`px-4 py-2 rounded-lg font-semibold ${mode === 'basic' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>Básico</button>
-                                    <button onClick={() => { setMode('advanced'); setCurrentStep(0); }} className={`px-4 py-2 rounded-lg font-semibold ${mode === 'advanced' ? 'bg-indigo-600 text-white' : 'bg-gray-200'}`}>Avanzado</button>
+                                <div className="flex gap-3 flex-wrap">
+                                    <button
+                                        onClick={() => setMode(mode === 'basic' ? 'advanced' : 'basic')}
+                                        className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                                            mode === 'basic' 
+                                                ? 'bg-blue-600 text-white' 
+                                                : 'bg-indigo-600 text-white'
+                                        }`}
+                                    >
+                                        {mode === 'basic' ? '📖 Básico' : '🚀 Avanzado'}
+                                    </button>
+                                    <button
+                                        onClick={() => setDarkMode(!darkMode)}
+                                        className={`p-3 rounded-lg ${darkMode ? 'bg-gray-700 text-yellow-400' : 'bg-gray-100'} hover:scale-110 transition-transform`}
+                                        title={darkMode ? 'Modo Claro' : 'Modo Oscuro'}
+                                    >
+                                        {darkMode ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
+                                    </button>
+                                    {mode === 'advanced' && (
+                                        <button
+                                            onClick={exportProgress}
+                                            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                        >
+                                            <Download className="w-5 h-5" />
+                                            <span className="hidden sm:inline">Exportar</span>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
+
+                            {/* Navigation para modo avanzado */}
+                            {mode === 'advanced' && (
+                                <div className="flex gap-2 flex-wrap mb-4">
+                                    <button
+                                        onClick={() => setCurrentView('explorer')}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors ${
+                                            currentView === 'explorer'
+                                                ? 'bg-blue-600 text-white'
+                                                : darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200'
+                                        }`}
+                                    >
+                                        <Target className="w-5 h-5" />
+                                        Explorador
+                                    </button>
+                                    <button
+                                        onClick={() => setCurrentView('quiz')}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors ${
+                                            currentView === 'quiz'
+                                                ? 'bg-purple-600 text-white'
+                                                : darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200'
+                                        }`}
+                                    >
+                                        <ClipboardList className="w-5 h-5" />
+                                        Quiz
+                                    </button>
+                                    <button
+                                        onClick={() => setCurrentView('cases')}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors ${
+                                            currentView === 'cases'
+                                                ? 'bg-red-600 text-white'
+                                                : darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200'
+                                        }`}
+                                    >
+                                        <BookOpen className="w-5 h-5" />
+                                        Casos
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Progress Bar */}
                             <div className="mt-4">
-                                <div className="flex justify-between text-xs mb-2">
-                                    <span>Progreso</span>
-                                    <span>{Math.round(progress)}%</span>
+                                <div className="flex justify-between text-sm mb-2">
+                                    <span>Progreso {mode === 'basic' ? 'Tutorial' : 'Global'}</span>
+                                    <span>
+                                        {mode === 'basic' 
+                                            ? `Paso ${currentStep + 1}/${basicSteps.length}`
+                                            : `${userProgress.viewed.length} técnicas | Quiz: ${userProgress.quizScore}/${quizQuestions.length}`
+                                        }
+                                    </span>
                                 </div>
-                                <div className="w-full bg-gray-200 rounded-full h-3">
-                                    <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all" style={{ width: `${progress}%` }} />
+                                <div className={`w-full ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-2`}>
+                                    <div 
+                                        className={`h-2 rounded-full transition-all ${
+                                            mode === 'basic'
+                                                ? 'bg-gradient-to-r from-blue-500 to-purple-500'
+                                                : 'bg-gradient-to-r from-indigo-500 to-pink-500'
+                                        }`}
+                                        style={{ width: `${progress}%` }}
+                                    />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg shadow-xl p-8 mb-6 min-h-[500px]">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="bg-gradient-to-br from-blue-500 to-purple-500 p-3 rounded-lg">
-                                    <Shield className="w-8 h-8 text-white" />
+                        {/* Content Area - Modo Básico */}
+                        {mode === 'basic' && (
+                            <div className="slide-in">
+                                <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl p-8 mb-6 min-h-[500px]`}>
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="bg-gradient-to-br from-blue-500 to-purple-500 p-3 rounded-lg">
+                                            <Shield className="w-8 h-8 text-white" />
+                                        </div>
+                                        <div>
+                                            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                Paso {currentStep + 1} de {basicSteps.length}
+                                            </p>
+                                            <h2 className="text-2xl font-bold">{basicSteps[currentStep].title}</h2>
+                                        </div>
+                                    </div>
+                                    {basicSteps[currentStep].content}
                                 </div>
-                                <div>
-                                    <p className="text-sm text-gray-500">Paso {currentStep + 1} de {steps.length}</p>
-                                    <h2 className="text-2xl font-bold">{steps[currentStep].title}</h2>
+
+                                <div className="flex justify-between">
+                                    <button
+                                        onClick={prevStep}
+                                        disabled={currentStep === 0}
+                                        className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                                            currentStep === 0
+                                                ? darkMode ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-xl'
+                                        }`}
+                                    >
+                                        <ChevronLeft className="w-5 h-5" />
+                                        Anterior
+                                    </button>
+                                    <button
+                                        onClick={nextStep}
+                                        disabled={currentStep === basicSteps.length - 1}
+                                        className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                                            currentStep === basicSteps.length - 1
+                                                ? darkMode ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-xl'
+                                        }`}
+                                    >
+                                        Siguiente
+                                        <ChevronRight className="w-5 h-5" />
+                                    </button>
                                 </div>
                             </div>
-                            {steps[currentStep].content}
-                        </div>
+                        )}
 
-                        <div className="flex justify-between">
-                            <button onClick={prevStep} disabled={currentStep === 0} className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold ${currentStep === 0 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-xl'}`}>
-                                <ChevronLeft className="w-5 h-5" />Anterior
-                            </button>
-                            <button onClick={nextStep} disabled={currentStep === steps.length - 1} className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold ${currentStep === steps.length - 1 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-xl'}`}>
-                                Siguiente<ChevronRight className="w-5 h-5" />
-                            </button>
-                        </div>
+                        {/* Content Area - Modo Avanzado */}
+                        {mode === 'advanced' && currentView === 'explorer' && (
+                            <div className="slide-in">
+                                {/* Search Bar */}
+                                <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg p-4 mb-6`}>
+                                    <div className="relative">
+                                        <Search className="w-5 h-5 absolute left-3 top-3 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            placeholder="Buscar tácticas o técnicas... (ej: T1566, Phishing, Persistence)"
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
+                                                darkMode 
+                                                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                                                    : 'bg-white border-gray-300'
+                                            } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Tactics Explorer */}
+                                <div className="space-y-4">
+                                    {filteredTactics.map((tactic, idx) => (
+                                        <div key={idx} className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg border-2 ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                                            <div 
+                                                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-colors rounded-t-lg"
+                                                onClick={() => setSelectedTactic(selectedTactic === idx ? null : idx)}
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-3xl">{tactic.emoji}</span>
+                                                        <div>
+                                                            <h4 className="font-bold text-xl">{tactic.name}</h4>
+                                                            <p className="text-sm opacity-90">{tactic.description}</p>
+                                                        </div>
+                                                    </div>
+                                                    <ChevronRight className="w-6 h-6" style={{ transform: selectedTactic === idx ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }} />
+                                                </div>
+                                            </div>
+                                            
+                                            {selectedTactic === idx && (
+                                                <div className={`p-6 ${darkMode ? 'bg-gray-750' : 'bg-gray-50'}`}>
+                                                    <div className={`${darkMode ? 'bg-blue-900' : 'bg-blue-100'} p-4 rounded-lg mb-4`}>
+                                                        <p className={`font-semibold ${darkMode ? 'text-blue-200' : 'text-blue-900'}`}>
+                                                            🎯 Objetivo: {tactic.objective}
+                                                        </p>
+                                                    </div>
+
+                                                    <p className="font-bold mb-3">Técnicas ({tactic.techniques.length}):</p>
+                                                    {tactic.techniques.map((tech, techIdx) => (
+                                                        <div key={techIdx} className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow border-l-4 border-green-500 mb-3`}>
+                                                            <div 
+                                                                className="p-4 cursor-pointer hover:bg-opacity-50 transition-colors"
+                                                                onClick={() => {
+                                                                    const detailKey = `${idx}-${techIdx}`;
+                                                                    setSelectedTechniqueDetail(selectedTechniqueDetail === detailKey ? null : detailKey);
+                                                                    handleTechniqueView(tactic.id, tech.id);
+                                                                }}
+                                                            >
+                                                                <div className="flex justify-between">
+                                                                    <div className="flex gap-3 flex-1">
+                                                                        <Zap className="w-5 h-5 text-green-600 mt-1 flex-shrink-0" />
+                                                                        <div className="flex-1">
+                                                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                                                <span className={`font-mono text-xs ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} px-2 py-1 rounded`}>{tech.id}</span>
+                                                                                <strong className={darkMode ? 'text-green-400' : 'text-green-700'}>{tech.name}</strong>
+                                                                                {tech.subtechniques && tech.subtechniques.length > 0 && (
+                                                                                    <span className={`text-xs ${darkMode ? 'bg-purple-900 text-purple-200' : 'bg-purple-100 text-purple-800'} px-2 py-1 rounded`}>
+                                                                                        {tech.subtechniques.length} sub-técnicas
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                            <p className="text-sm">{tech.description}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                    <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" style={{ transform: selectedTechniqueDetail === `${idx}-${techIdx}` ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }} />
+                                                                </div>
+                                                            </div>
+
+                                                            {selectedTechniqueDetail === `${idx}-${techIdx}` && (
+                                                                <div className="px-4 pb-4 space-y-3">
+                                                                    <div className={`${darkMode ? 'bg-orange-900' : 'bg-orange-50'} p-3 rounded border-l-4 border-orange-400`}>
+                                                                        <p className={`font-semibold text-sm mb-1 ${darkMode ? 'text-orange-200' : 'text-orange-900'}`}>💡 Ejemplo Real:</p>
+                                                                        <p className={`text-sm ${darkMode ? 'text-orange-100' : 'text-orange-800'}`}>{tech.example}</p>
+                                                                    </div>
+
+                                                                    <div className={`${darkMode ? 'bg-blue-900' : 'bg-blue-50'} p-3 rounded border-l-4 border-blue-400`}>
+                                                                        <p className={`font-semibold text-sm mb-1 ${darkMode ? 'text-blue-200' : 'text-blue-900'}`}>🔍 Detección:</p>
+                                                                        <p className={`text-sm ${darkMode ? 'text-blue-100' : 'text-blue-800'}`}>{tech.detection}</p>
+                                                                    </div>
+
+                                                                    <div className={`${darkMode ? 'bg-green-900' : 'bg-green-50'} p-3 rounded border-l-4 border-green-400`}>
+                                                                        <p className={`font-semibold text-sm mb-1 ${darkMode ? 'text-green-200' : 'text-green-900'}`}>🛡️ Mitigación:</p>
+                                                                        <p className={`text-sm ${darkMode ? 'text-green-100' : 'text-green-800'}`}>{tech.mitigation}</p>
+                                                                    </div>
+
+                                                                    {tech.subtechniques && tech.subtechniques.length > 0 && (
+                                                                        <div className={`${darkMode ? 'bg-purple-900' : 'bg-purple-50'} p-3 rounded border-l-4 border-purple-400`}>
+                                                                            <p className={`font-semibold text-sm mb-2 ${darkMode ? 'text-purple-200' : 'text-purple-900'}`}>🔬 Sub-técnicas:</p>
+                                                                            <div className="space-y-2">
+                                                                                {tech.subtechniques.map((sub, subIdx) => (
+                                                                                    <div key={subIdx} className={`${darkMode ? 'bg-purple-800' : 'bg-white'} p-2 rounded text-sm`}>
+                                                                                        <span className={`font-mono text-xs ${darkMode ? 'bg-purple-700' : 'bg-purple-200'} px-2 py-1 rounded mr-2`}>{sub.id}</span>
+                                                                                        <strong>{sub.name}:</strong> {sub.description}
+                                                                                    </div>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Quiz View */}
+                        {mode === 'advanced' && currentView === 'quiz' && (
+                            <div className="slide-in">
+                                <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl p-8`}>
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h2 className="text-2xl font-bold">Quiz Interactivo</h2>
+                                        <div className="text-right">
+                                            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Pregunta {currentQuizQuestion + 1} de {quizQuestions.length}</p>
+                                            <p className="font-bold text-lg">Puntuación: {userProgress.quizScore}/{quizQuestions.length}</p>
+                                        </div>
+                                    </div>
+
+                                    {currentQuizQuestion < quizQuestions.length ? (
+                                        <div>
+                                            <div className={`${darkMode ? 'bg-blue-900' : 'bg-blue-50'} p-6 rounded-lg mb-6`}>
+                                                <p className="text-lg font-semibold">{quizQuestions[currentQuizQuestion].question}</p>
+                                            </div>
+
+                                            <div className="space-y-3 mb-6">
+                                                {quizQuestions[currentQuizQuestion].options.map((option, idx) => {
+                                                    let bgClass = darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200';
+                                                    if (showQuizResult) {
+                                                        if (idx === quizQuestions[currentQuizQuestion].correct) {
+                                                            bgClass = 'quiz-correct';
+                                                        } else if (idx === selectedAnswer && idx !== quizQuestions[currentQuizQuestion].correct) {
+                                                            bgClass = 'quiz-incorrect';
+                                                        }
+                                                    }
+
+                                                    return (
+                                                        <button
+                                                            key={idx}
+                                                            onClick={() => !showQuizResult && handleQuizAnswer(idx)}
+                                                            disabled={showQuizResult}
+                                                            className={`quiz-option w-full text-left p-4 rounded-lg ${bgClass} transition-all`}
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <span className="font-bold">{String.fromCharCode(65 + idx)}.</span>
+                                                                <span>{option}</span>
+                                                                {showQuizResult && idx === quizQuestions[currentQuizQuestion].correct && (
+                                                                    <CheckCircle className="w-5 h-5 ml-auto" />
+                                                                )}
+                                                                {showQuizResult && idx === selectedAnswer && idx !== quizQuestions[currentQuizQuestion].correct && (
+                                                                    <XCircle className="w-5 h-5 ml-auto" />
+                                                                )}
+                                                            </div>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+
+                                            {showQuizResult && (
+                                                <div className={`${selectedAnswer === quizQuestions[currentQuizQuestion].correct ? (darkMode ? 'bg-green-900' : 'bg-green-50') : (darkMode ? 'bg-red-900' : 'bg-red-50')} p-4 rounded-lg mb-4`}>
+                                                    <p className="font-semibold mb-2">
+                                                        {selectedAnswer === quizQuestions[currentQuizQuestion].correct ? '✅ ¡Correcto!' : '❌ Incorrecto'}
+                                                    </p>
+                                                    <p className="text-sm">{quizQuestions[currentQuizQuestion].explanation}</p>
+                                                </div>
+                                            )}
+
+                                            <div className="flex justify-between">
+                                                <button
+                                                    onClick={resetQuiz}
+                                                    className={`px-6 py-2 rounded-lg ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} transition-colors`}
+                                                >
+                                                    Reiniciar Quiz
+                                                </button>
+                                                {showQuizResult && (
+                                                    <button
+                                                        onClick={nextQuizQuestion}
+                                                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                                    >
+                                                        {currentQuizQuestion < quizQuestions.length - 1 ? 'Siguiente Pregunta' : 'Ver Resultados'}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center">
+                                            <div className={`${darkMode ? 'bg-blue-900' : 'bg-blue-50'} p-8 rounded-lg mb-6`}>
+                                                <h3 className="text-2xl font-bold mb-4">¡Quiz Completado!</h3>
+                                                <p className="text-4xl font-bold mb-2">{userProgress.quizScore}/{quizQuestions.length}</p>
+                                                <p className="text-lg">
+                                                    {userProgress.quizScore === quizQuestions.length && '🎉 ¡Perfecto! Dominas MITRE ATT&CK'}
+                                                    {userProgress.quizScore >= quizQuestions.length * 0.7 && userProgress.quizScore < quizQuestions.length && '👏 ¡Muy bien! Buen conocimiento'}
+                                                    {userProgress.quizScore < quizQuestions.length * 0.7 && '📚 Sigue practicando, vas por buen camino'}
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={resetQuiz}
+                                                className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-bold"
+                                            >
+                                                Reintentar Quiz
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Cases View */}
+                        {mode === 'advanced' && currentView === 'cases' && (
+                            <div className="slide-in space-y-6">
+                                {!selectedCase ? (
+                                    caseStudies.map(caseStudy => (
+                                        <div key={caseStudy.id} className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl p-6 cursor-pointer hover:shadow-2xl transition-shadow`}
+                                            onClick={() => {
+                                                setSelectedCase(caseStudy);
+                                                if (!userProgress.casesRead.includes(caseStudy.id)) {
+                                                    setUserProgress(prev => ({
+                                                        ...prev,
+                                                        casesRead: [...prev.casesRead, caseStudy.id]
+                                                    }));
+                                                }
+                                            }}
+                                        >
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div>
+                                                    <h3 className="text-2xl font-bold mb-2">{caseStudy.title}</h3>
+                                                    <span className={`inline-block ${darkMode ? 'bg-red-900 text-red-200' : 'bg-red-100 text-red-800'} px-3 py-1 rounded-full text-sm font-semibold`}>
+                                                        {caseStudy.year}
+                                                    </span>
+                                                </div>
+                                                <ChevronRight className="w-6 h-6 text-gray-400" />
+                                            </div>
+                                            <p className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-4`}>{caseStudy.description}</p>
+                                            <div className="flex items-center gap-2 text-sm text-blue-600">
+                                                <BookOpen className="w-4 h-4" />
+                                                <span>Leer caso completo →</span>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl p-8`}>
+                                        <button
+                                            onClick={() => setSelectedCase(null)}
+                                            className={`mb-6 ${darkMode ? 'text-blue-400' : 'text-blue-600'} hover:underline flex items-center gap-2`}
+                                        >
+                                            <ChevronLeft className="w-4 h-4" />
+                                            Volver a casos de estudio
+                                        </button>
+
+                                        <div className="mb-6">
+                                            <h2 className="text-3xl font-bold mb-3">{selectedCase.title}</h2>
+                                            <span className={`inline-block ${darkMode ? 'bg-red-900 text-red-200' : 'bg-red-100 text-red-800'} px-4 py-2 rounded-full text-sm font-semibold`}>
+                                                {selectedCase.year}
+                                            </span>
+                                        </div>
+
+                                        <div className={`${darkMode ? 'bg-orange-900' : 'bg-orange-50'} p-6 rounded-lg mb-6 border-l-4 border-orange-500`}>
+                                            <h4 className={`font-bold text-lg mb-2 ${darkMode ? 'text-orange-200' : 'text-orange-900'}`}>Escenario</h4>
+                                            <p className={darkMode ? 'text-orange-100' : 'text-orange-800'}>{selectedCase.scenario}</p>
+                                        </div>
+
+                                        <div className="mb-6">
+                                            <h4 className="font-bold text-xl mb-4">Cadena de Ataque (Kill Chain)</h4>
+                                            <div className="space-y-4">
+                                                {selectedCase.attackChain.map((step, idx) => (
+                                                    <div key={idx} className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} p-4 rounded-lg border-l-4 border-red-500`}>
+                                                        <div className="flex items-start gap-3">
+                                                            <div className="bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
+                                                                {idx + 1}
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                <p className="font-bold text-lg mb-1">{step.tactic}</p>
+                                                                <p className={`text-sm font-mono ${darkMode ? 'bg-gray-800' : 'bg-gray-200'} inline-block px-2 py-1 rounded mb-2`}>{step.technique}</p>
+                                                                <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{step.detail}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className={`${darkMode ? 'bg-green-900' : 'bg-green-50'} p-6 rounded-lg border-l-4 border-green-500`}>
+                                            <h4 className={`font-bold text-lg mb-3 ${darkMode ? 'text-green-200' : 'text-green-900'}`}>🎓 Lecciones Aprendidas</h4>
+                                            <ul className="space-y-2">
+                                                {selectedCase.lessons.map((lesson, idx) => (
+                                                    <li key={idx} className={`flex items-start gap-2 ${darkMode ? 'text-green-100' : 'text-green-800'}`}>
+                                                        <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                                                        <span>{lesson}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             );
