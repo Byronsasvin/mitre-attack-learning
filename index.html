@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprende MITRE ATT&CK - Tutorial Interactivo</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // Iconos SVG personalizados
+        const ChevronRight = ({ className, style }) => (
+            <svg className={className} style={style} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+        );
+
+        const ChevronLeft = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+        );
+
+        const Shield = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+        );
+
+        const Target = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+        );
+
+        const Zap = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+        );
+
+        const CheckCircle = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        );
+
+        const Info = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        );
+
+        const AlertTriangle = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+        );
+
+        const BookOpen = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+        );
+
+        const MitreAttackApp = () => {
+            const [currentStep, setCurrentStep] = useState(0);
+            const [selectedTactic, setSelectedTactic] = useState(null);
+            const [completedSteps, setCompletedSteps] = useState([]);
+            const [mode, setMode] = useState('basic');
+            const [selectedTechniqueDetail, setSelectedTechniqueDetail] = useState(null);
+            const [filterTactic, setFilterTactic] = useState('all');
+
+            const tacticsData = [
+                {
+                    id: 'reconnaissance',
+                    name: 'Reconnaissance',
+                    emoji: '🔍',
+                    description: 'El atacante recopila información para planificar operaciones futuras',
+                    objective: 'Conocer el objetivo antes de atacarlo',
+                    techniques: [
+                        { id: 'T1595', name: 'Active Scanning', description: 'Escanear infraestructura de la víctima', example: 'Usar Nmap para escanear puertos abiertos', detection: 'Monitorear tráfico de red inusual', mitigation: 'Implementar IDS/IPS' },
+                        { id: 'T1589', name: 'Gather Victim Identity', description: 'Recopilar información de empleados', example: 'Buscar empleados en LinkedIn', detection: 'Difícil de detectar - ocurre fuera de la red', mitigation: 'Capacitación en seguridad' }
+                    ]
+                },
+                {
+                    id: 'initial-access',
+                    name: 'Initial Access',
+                    emoji: '🚪',
+                    description: 'Técnicas para obtener acceso inicial',
+                    objective: 'Entrar al sistema de la víctima',
+                    techniques: [
+                        { id: 'T1566', name: 'Phishing', description: 'Correos maliciosos para engañar usuarios', example: 'Email de IT pidiendo cambiar contraseña', detection: 'Filtros anti-phishing', mitigation: 'Capacitación de usuarios, MFA' },
+                        { id: 'T1190', name: 'Exploit Public Application', description: 'Explotar vulnerabilidades web', example: 'Inyección SQL en formulario login', detection: 'WAF, monitoreo de exploits', mitigation: 'Parchear vulnerabilidades, WAF' }
+                    ]
+                },
+                {
+                    id: 'execution',
+                    name: 'Execution',
+                    emoji: '⚡',
+                    description: 'Ejecutar código malicioso',
+                    objective: 'Correr malware en la máquina',
+                    techniques: [
+                        { id: 'T1204', name: 'User Execution', description: 'Engañar al usuario', example: 'Usuario abre archivo .exe malicioso', detection: 'Monitorear archivos descargados', mitigation: 'Bloquear macros, capacitación' }
+                    ]
+                },
+                {
+                    id: 'persistence',
+                    name: 'Persistence',
+                    emoji: '🔒',
+                    description: 'Mantener acceso al sistema',
+                    objective: 'No perder acceso tras reinicios',
+                    techniques: [
+                        { id: 'T1547', name: 'Boot Autostart', description: 'Iniciarse automáticamente', example: 'Registry Run Keys en Windows', detection: 'Monitorear cambios en autostart', mitigation: 'Auditar registro, mínimos privilegios' }
+                    ]
+                },
+                {
+                    id: 'defense-evasion',
+                    name: 'Defense Evasion',
+                    emoji: '👻',
+                    description: 'Evitar detección',
+                    objective: 'Pasar desapercibido',
+                    techniques: [
+                        { id: 'T1070', name: 'Indicator Removal', description: 'Eliminar evidencias', example: 'Borrar logs de eventos', detection: 'Detectar borrado de logs', mitigation: 'Logs externos, SIEM' }
+                    ]
+                },
+                {
+                    id: 'impact',
+                    name: 'Impact',
+                    emoji: '💥',
+                    description: 'Causar daño',
+                    objective: 'Destruir datos o interrumpir',
+                    techniques: [
+                        { id: 'T1486', name: 'Data Encrypted', description: 'Cifrar datos', example: 'Ransomware', detection: 'Cifrado masivo de archivos', mitigation: 'Backups offline, EDR' }
+                    ]
+                }
+            ];
+
+            const steps = mode === 'basic' ? [
+                {
+                    title: "¿Qué es MITRE ATT&CK?",
+                    content: (
+                        <div className="space-y-4">
+                            <h3 className="text-2xl font-bold text-blue-600">Bienvenido al Framework MITRE ATT&CK</h3>
+                            <p className="text-lg">MITRE ATT&CK es una base de conocimiento global sobre tácticas y técnicas de adversarios cibernéticos.</p>
+                            <div className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500">
+                                <h4 className="font-bold mb-2">¿Para qué sirve?</h4>
+                                <ul className="space-y-2">
+                                    <li className="flex gap-2"><CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-1" /><span>Entender cómo operan los atacantes</span></li>
+                                    <li className="flex gap-2"><CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-1" /><span>Mejorar defensas de ciberseguridad</span></li>
+                                </ul>
+                            </div>
+                            <div className="bg-gradient-to-r from-purple-100 to-pink-100 p-6 rounded-lg">
+                                <p className="font-semibold mb-2">🎓 Dos niveles:</p>
+                                <div className="space-y-2">
+                                    <div className="bg-white p-3 rounded"><strong>Básico:</strong> Conceptos fundamentales</div>
+                                    <div className="bg-white p-3 rounded"><strong>Avanzado:</strong> Relación detallada con ejemplos reales</div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+                {
+                    title: "Tácticas vs Técnicas",
+                    content: (
+                        <div className="space-y-4">
+                            <h3 className="text-2xl font-bold text-purple-600">Entendiendo la Diferencia</h3>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div className="bg-purple-50 p-6 rounded-lg border-2 border-purple-300">
+                                    <Target className="w-12 h-12 text-purple-600 mb-3" />
+                                    <h4 className="font-bold text-lg mb-2">TÁCTICAS (El POR QUÉ)</h4>
+                                    <p>Los <strong>objetivos</strong> que el atacante quiere lograr</p>
+                                    <p className="text-sm mt-2 text-gray-600">Ejemplo: "Entrar al sistema"</p>
+                                </div>
+                                <div className="bg-green-50 p-6 rounded-lg border-2 border-green-300">
+                                    <Zap className="w-12 h-12 text-green-600 mb-3" />
+                                    <h4 className="font-bold text-lg mb-2">TÉCNICAS (El CÓMO)</h4>
+                                    <p>Los <strong>métodos específicos</strong> para lograr el objetivo</p>
+                                    <p className="text-sm mt-2 text-gray-600">Ejemplo: "Phishing, Exploit, Credenciales"</p>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+                {
+                    title: "Resumen",
+                    content: (
+                        <div className="space-y-4">
+                            <h3 className="text-2xl font-bold text-teal-600">🎓 ¡Nivel Básico Completado!</h3>
+                            <div className="bg-gradient-to-r from-orange-400 to-red-400 text-white p-6 rounded-lg">
+                                <h4 className="font-bold mb-2">🚀 Modo Avanzado</h4>
+                                <p className="mb-4">Aprende relación detallada, ejemplos reales, detección y mitigación</p>
+                                <button onClick={() => setMode('advanced')} className="bg-white text-orange-600 px-6 py-2 rounded-lg font-bold hover:bg-gray-100">
+                                    Cambiar a Avanzado
+                                </button>
+                            </div>
+                        </div>
+                    )
+                }
+            ] : [
+                {
+                    title: "Modo Avanzado",
+                    content: (
+                        <div className="space-y-4">
+                            <h3 className="text-2xl font-bold text-indigo-600">Análisis Profundo</h3>
+                            <div className="grid md:grid-cols-3 gap-4">
+                                <div className="bg-purple-100 p-4 rounded-lg text-center">
+                                    <Target className="w-12 h-12 text-purple-600 mx-auto mb-2" />
+                                    <p className="font-bold">6 Tácticas</p>
+                                </div>
+                                <div className="bg-green-100 p-4 rounded-lg text-center">
+                                    <Zap className="w-12 h-12 text-green-600 mx-auto mb-2" />
+                                    <p className="font-bold">10+ Técnicas</p>
+                                </div>
+                                <div className="bg-blue-100 p-4 rounded-lg text-center">
+                                    <Info className="w-12 h-12 text-blue-600 mx-auto mb-2" />
+                                    <p className="font-bold">Con Detección</p>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+                {
+                    title: "Explorador",
+                    content: (
+                        <div className="space-y-4">
+                            <h3 className="text-2xl font-bold text-blue-600">Explorador de Tácticas</h3>
+                            <select value={filterTactic} onChange={(e) => setFilterTactic(e.target.value)} className="w-full px-3 py-2 border rounded-lg">
+                                <option value="all">Todas</option>
+                                {tacticsData.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                            </select>
+                            <div className="space-y-4">
+                                {tacticsData.filter(t => filterTactic === 'all' || t.id === filterTactic).map((tactic, idx) => (
+                                    <div key={idx} className="bg-white rounded-lg shadow-lg border-2">
+                                        <div className="bg-blue-500 text-white p-4 cursor-pointer hover:bg-blue-600" onClick={() => setSelectedTactic(selectedTactic === idx ? null : idx)}>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-3xl">{tactic.emoji}</span>
+                                                    <div>
+                                                        <h4 className="font-bold text-xl">{tactic.name}</h4>
+                                                        <p className="text-sm opacity-90">{tactic.description}</p>
+                                                    </div>
+                                                </div>
+                                                <ChevronRight className="w-6 h-6" style={{ transform: selectedTactic === idx ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }} />
+                                            </div>
+                                        </div>
+                                        {selectedTactic === idx && (
+                                            <div className="p-6 bg-gray-50">
+                                                <div className="bg-blue-100 p-4 rounded-lg mb-4">
+                                                    <p className="font-semibold">🎯 Objetivo: {tactic.objective}</p>
+                                                </div>
+                                                <p className="font-bold mb-3">Técnicas ({tactic.techniques.length}):</p>
+                                                {tactic.techniques.map((tech, techIdx) => (
+                                                    <div key={techIdx} className="bg-white rounded-lg shadow border-l-4 border-green-500 mb-3">
+                                                        <div className="p-4 cursor-pointer" onClick={() => setSelectedTechniqueDetail(selectedTechniqueDetail === `${idx}-${techIdx}` ? null : `${idx}-${techIdx}`)}>
+                                                            <div className="flex justify-between">
+                                                                <div className="flex gap-3 flex-1">
+                                                                    <Zap className="w-5 h-5 text-green-600 mt-1" />
+                                                                    <div>
+                                                                        <div className="flex gap-2 mb-1">
+                                                                            <span className="font-mono text-xs bg-gray-200 px-2 py-1 rounded">{tech.id}</span>
+                                                                            <strong className="text-green-700">{tech.name}</strong>
+                                                                        </div>
+                                                                        <p className="text-sm">{tech.description}</p>
+                                                                    </div>
+                                                                </div>
+                                                                <ChevronRight className="w-5 h-5 text-gray-400" style={{ transform: selectedTechniqueDetail === `${idx}-${techIdx}` ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }} />
+                                                            </div>
+                                                        </div>
+                                                        {selectedTechniqueDetail === `${idx}-${techIdx}` && (
+                                                            <div className="px-4 pb-4 space-y-3">
+                                                                <div className="bg-orange-50 p-3 rounded border-l-4 border-orange-400">
+                                                                    <p className="font-semibold text-sm mb-1">💡 Ejemplo: {tech.example}</p>
+                                                                </div>
+                                                                <div className="bg-blue-50 p-3 rounded border-l-4 border-blue-400">
+                                                                    <p className="font-semibold text-sm mb-1">🔍 Detección: {tech.detection}</p>
+                                                                </div>
+                                                                <div className="bg-green-50 p-3 rounded border-l-4 border-green-400">
+                                                                    <p className="font-semibold text-sm mb-1">🛡️ Mitigación: {tech.mitigation}</p>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )
+                }
+            ];
+
+            const nextStep = () => {
+                if (currentStep < steps.length - 1) {
+                    if (!completedSteps.includes(currentStep)) {
+                        setCompletedSteps([...completedSteps, currentStep]);
+                    }
+                    setCurrentStep(currentStep + 1);
+                }
+            };
+
+            const prevStep = () => {
+                if (currentStep > 0) setCurrentStep(currentStep - 1);
+            };
+
+            const progress = ((currentStep + 1) / steps.length) * 100;
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-4">
+                    <div className="max-w-5xl mx-auto">
+                        <div className="bg-white rounded-lg shadow-xl p-6 mb-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                    <Shield className="w-10 h-10 text-blue-600" />
+                                    <div>
+                                        <h1 className="text-3xl font-bold">Aprende MITRE ATT&CK</h1>
+                                        <p className="text-gray-600">Tutorial interactivo</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button onClick={() => { setMode('basic'); setCurrentStep(0); }} className={`px-4 py-2 rounded-lg font-semibold ${mode === 'basic' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>Básico</button>
+                                    <button onClick={() => { setMode('advanced'); setCurrentStep(0); }} className={`px-4 py-2 rounded-lg font-semibold ${mode === 'advanced' ? 'bg-indigo-600 text-white' : 'bg-gray-200'}`}>Avanzado</button>
+                                </div>
+                            </div>
+                            <div className="mt-4">
+                                <div className="flex justify-between text-xs mb-2">
+                                    <span>Progreso</span>
+                                    <span>{Math.round(progress)}%</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-3">
+                                    <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all" style={{ width: `${progress}%` }} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-lg shadow-xl p-8 mb-6 min-h-[500px]">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="bg-gradient-to-br from-blue-500 to-purple-500 p-3 rounded-lg">
+                                    <Shield className="w-8 h-8 text-white" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500">Paso {currentStep + 1} de {steps.length}</p>
+                                    <h2 className="text-2xl font-bold">{steps[currentStep].title}</h2>
+                                </div>
+                            </div>
+                            {steps[currentStep].content}
+                        </div>
+
+                        <div className="flex justify-between">
+                            <button onClick={prevStep} disabled={currentStep === 0} className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold ${currentStep === 0 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-xl'}`}>
+                                <ChevronLeft className="w-5 h-5" />Anterior
+                            </button>
+                            <button onClick={nextStep} disabled={currentStep === steps.length - 1} className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold ${currentStep === steps.length - 1 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-xl'}`}>
+                                Siguiente<ChevronRight className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<MitreAttackApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
